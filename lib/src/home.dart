@@ -8,6 +8,7 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> with TickerProviderStateMixin {
   Animation<double> catAnimation;
   AnimationController catController;
+  Widget a1, a2;
 
   List<String> numbers = [
     '1',
@@ -42,7 +43,9 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    /*return Scaffold(
+    a1 = buildCatAnimation("1", 0, 0);
+    a2 = buildCatAnimation("22", 100, 100);
+    return Scaffold(
       appBar: AppBar(
         title: Text("Animation!"),
       ),
@@ -51,14 +54,15 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
           child: Stack(
             overflow: Overflow.visible,
             children: <Widget>[
-              buildCatAnimation(),
+              a1,
+              a2,
             ],
           ),
         ),
         onTap: onTap,
       ),
-    );*/
-    return Scaffold(
+    );
+    /*return Scaffold(
         appBar: AppBar(
           title: Text("?"),
         ),
@@ -79,35 +83,43 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
                       _getPositions(gk);
                     });
               }).toList()),
-        ));
+        ));*/
   }
 
-  _getPositions(GlobalKey gk) {
+  /*_getPositions(GlobalKey gk) {
     final RenderBox renderBox = gk.currentContext.findRenderObject();
     final position = renderBox.localToGlobal(Offset.zero);
     print("${position.dx} - ${position.dy}");
-  }
+  }*/
 
-  Widget buildCatAnimation() {
+  Widget buildCatAnimation(String text, double top, double left) {
+    print("build");
     return AnimatedBuilder(
-      animation: catAnimation,
+      // get new coords here
+      animation: Tween(begin: 0.0, end: 80.0).animate(
+        CurvedAnimation(
+          parent: catController,
+          curve: Curves.easeIn,
+        ),
+      ),
       builder: (context, child) {
         return Positioned(
           child: child,
-          top: catAnimation.value,
-          left: 0.0,
-          right: 0.0,
+          top: top + catAnimation.value,
+          left: left + catAnimation.value,
         );
       },
-      child: Text("cat"),
+      child: Text(text),
     );
   }
 
   void onTap() {
-    if (catController.status == AnimationStatus.completed) {
-      catController.reverse();
-    } else if (catController.status == AnimationStatus.dismissed) {
-      catController.forward();
-    }
+    setState(() {
+      if (catController.status == AnimationStatus.completed) {
+        catController.reverse();
+      } else if (catController.status == AnimationStatus.dismissed) {
+        catController.forward();
+      }
+    });
   }
 }
