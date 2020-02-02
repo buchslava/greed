@@ -6,36 +6,23 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> with TickerProviderStateMixin {
-  Animation<double> catAnimation;
-  AnimationController catController;
-  Widget a1, a2;
-
-  List<String> numbers = [
-    '1',
-    '11',
-    '4',
-    '5',
-    '1',
-    '9',
-    '8',
-    '17',
-    '23',
-    '20',
-    '12',
-  ];
+  Animation<double> animation;
+  AnimationController animController;
+  double buttonWidth = 50.0;
+  List<Widget> board = [];
 
   @override
   void initState() {
     super.initState();
 
-    catController = AnimationController(
+    animController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 200),
     );
 
-    catAnimation = Tween(begin: 0.0, end: 80.0).animate(
+    animation = Tween(begin: 0.0, end: 80.0).animate(
       CurvedAnimation(
-        parent: catController,
+        parent: animController,
         curve: Curves.easeIn,
       ),
     );
@@ -43,8 +30,14 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    a1 = buildCatAnimation("1", 0, 0);
-    a2 = buildCatAnimation("22", 100, 100);
+    board = [];
+    double left = 0.0;
+    for (int i = 0; i < 5; i++, left += buttonWidth) {
+      double top = 0.0;
+      for (int j = 0; j < 6; j++, top += buttonWidth) {
+        board.add(buildButtonAnimation((i + j).toString(), top, left));
+      }
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("Animation!"),
@@ -53,73 +46,42 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
         child: Center(
           child: Stack(
             overflow: Overflow.visible,
-            children: <Widget>[
-              a1,
-              a2,
-            ],
+            children: board,
           ),
         ),
-        onTap: onTap,
       ),
     );
-    /*return Scaffold(
-        appBar: AppBar(
-          title: Text("?"),
-        ),
-        body: Container(
-          color: Colors.white30,
-          child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 1.0,
-              padding: const EdgeInsets.all(4.0),
-              mainAxisSpacing: 4.0,
-              crossAxisSpacing: 4.0,
-              children: numbers.map((String n) {
-                GlobalKey gk = GlobalKey();
-                return OutlineButton(
-                    key: gk,
-                    child: Text(n),
-                    onPressed: () {
-                      _getPositions(gk);
-                    });
-              }).toList()),
-        ));*/
   }
 
-  /*_getPositions(GlobalKey gk) {
-    final RenderBox renderBox = gk.currentContext.findRenderObject();
-    final position = renderBox.localToGlobal(Offset.zero);
-    print("${position.dx} - ${position.dy}");
-  }*/
-
-  Widget buildCatAnimation(String text, double top, double left) {
-    print("build");
+  Widget buildButtonAnimation(String text, double top, double left) {
     return AnimatedBuilder(
       // get new coords here
       animation: Tween(begin: 0.0, end: 80.0).animate(
         CurvedAnimation(
-          parent: catController,
+          parent: animController,
           curve: Curves.easeIn,
         ),
       ),
       builder: (context, child) {
         return Positioned(
           child: child,
-          top: top + catAnimation.value,
-          left: left + catAnimation.value,
+          top: top + animation.value,
+          left: left + animation.value,
+          width: buttonWidth,
+          height: buttonWidth,
         );
       },
-      child: Text(text),
+      child: OutlineButton(
+          child: Text(text),
+          onPressed: () {
+            setState(() {
+              if (animController.status == AnimationStatus.completed) {
+                animController.reverse();
+              } else if (animController.status == AnimationStatus.dismissed) {
+                animController.forward();
+              }
+            });
+          }),
     );
-  }
-
-  void onTap() {
-    setState(() {
-      if (catController.status == AnimationStatus.completed) {
-        catController.reverse();
-      } else if (catController.status == AnimationStatus.dismissed) {
-        catController.forward();
-      }
-    });
   }
 }
