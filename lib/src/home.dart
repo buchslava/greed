@@ -13,16 +13,15 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> {
   bool _measured = false;
   Size _screenSize;
-  GlobalKey _key = new GlobalKey();
   Cell c1, c2, c3;
 
   @override
   void initState() {
     super.initState();
 
-    c1 = Cell(key: key1, x: 0.0, y: 0.0, text: "0");
-    c2 = Cell(key: key2, x: 1.0, y: 1.0, text: "1");
-    c3 = Cell(key: key3, x: 2.0, y: 0.0, text: "2");
+    c1 = new Cell(key: key1, x: 0.0, y: 0.0, text: "0");
+    c2 = new Cell(key: key2, x: 3.0, y: 3.0, text: "1");
+    c3 = new Cell(key: key3, x: 6.0, y: 0.0, text: "2");
   }
 
   @override
@@ -31,15 +30,13 @@ class HomeState extends State<Home> {
       _measure();
       return new Expanded(
         child: new Container(
-          key: _key,
           color: Colors.white,
         ),
       );
     } else {
       return new Expanded(
         flex: 1,
-        child: new GestureDetector(
-            child: new Container(
+        child: new Container(
           width: _screenSize.width,
           height: _screenSize.height,
           color: Colors.white,
@@ -50,15 +47,8 @@ class HomeState extends State<Home> {
                 c1,
                 c2,
                 c3,
-                Center(
-                  child: RaisedButton(
-                      child: Text('go'),
-                      onPressed: () {
-                        key3.currentState.go();
-                      }),
-                )
               ]),
-        )),
+        ),
       );
     }
   }
