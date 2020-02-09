@@ -4,6 +4,12 @@ import 'package:greed/src/cell.dart';
 final key1 = new GlobalKey<CellState>();
 final key2 = new GlobalKey<CellState>();
 final key3 = new GlobalKey<CellState>();
+final key4 = new GlobalKey<CellState>();
+final key5 = new GlobalKey<CellState>();
+final key6 = new GlobalKey<CellState>();
+final key7 = new GlobalKey<CellState>();
+final key8 = new GlobalKey<CellState>();
+final key9 = new GlobalKey<CellState>();
 
 class Home extends StatefulWidget {
   @override
@@ -13,15 +19,21 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> {
   bool _measured = false;
   Size _screenSize;
-  Cell c1, c2, c3;
+  List<Cell> cells = [
+    new Cell(key: key1, x: 0.0, y: 0.0, text: "c1"),
+    new Cell(key: key2, x: 1.0, y: 0.0, text: "c2"),
+    new Cell(key: key3, x: 2.0, y: 0.0, text: "c3"),
+    new Cell(key: key4, x: 0.0, y: 1.0, text: "c4"),
+    new Cell(key: key5, x: 1.0, y: 1.0, text: "c5"),
+    new Cell(key: key6, x: 2.0, y: 1.0, text: "c6"),
+    new Cell(key: key7, x: 0.0, y: 2.0, text: "c7"),
+    new Cell(key: key8, x: 1.0, y: 2.0, text: "c8"),
+    new Cell(key: key9, x: 2.0, y: 2.0, text: "c9"),
+  ];
 
   @override
   void initState() {
     super.initState();
-
-    c1 = new Cell(key: key1, x: 0.0, y: 0.0, text: "0");
-    c2 = new Cell(key: key2, x: 3.0, y: 3.0, text: "1");
-    c3 = new Cell(key: key3, x: 6.0, y: 0.0, text: "2");
   }
 
   @override
@@ -40,14 +52,10 @@ class HomeState extends State<Home> {
           width: _screenSize.width,
           height: _screenSize.height,
           color: Colors.white,
-          child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                c1,
-                c2,
-                c3,
-              ]),
+          child: GridView.count(
+            crossAxisCount: 3,
+            children: cells.map((cell) => cell).toList(),
+          ),
         ),
       );
     }
