@@ -1,14 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 
-var rng = new Random();
-
 class Cell extends StatefulWidget {
-  double x;
-  double y;
   String text;
 
-  Cell({Key key, this.x, this.y, this.text}) : super(key: key);
+  Cell({Key key, this.text}) : super(key: key);
 
   @override
   State<Cell> createState() => CellState();
@@ -34,8 +29,10 @@ class CellState extends State<Cell> with TickerProviderStateMixin {
       position: offset,
       child: new GestureDetector(
         onTap: () {
-          // restore new card after animation end
-          // elevation - global keys
+          final RenderBox box = context.findRenderObject();
+          final position = box.localToGlobal(Offset.zero);
+          print("${box.size} $position");
+          // todo restore new card after animation end
           switch (controller.status) {
             case AnimationStatus.completed:
               controller.reverse();
@@ -49,7 +46,6 @@ class CellState extends State<Cell> with TickerProviderStateMixin {
         },
         child: Card(
           child: Text(widget.text),
-          elevation: 8,
         ),
       ),
     );
