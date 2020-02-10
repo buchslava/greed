@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:greed/src/cell.dart';
+import 'package:greed/src/cell2.dart';
 
-final key1 = new GlobalKey<CellState>();
-final key2 = new GlobalKey<CellState>();
-final key3 = new GlobalKey<CellState>();
-final key4 = new GlobalKey<CellState>();
-final key5 = new GlobalKey<CellState>();
-final key6 = new GlobalKey<CellState>();
-final key7 = new GlobalKey<CellState>();
-final key8 = new GlobalKey<CellState>();
-final key9 = new GlobalKey<CellState>();
+final key1 = new GlobalKey<CellState2>();
+final key2 = new GlobalKey<CellState2>();
+final key3 = new GlobalKey<CellState2>();
+final key4 = new GlobalKey<CellState2>();
+final key5 = new GlobalKey<CellState2>();
+final key6 = new GlobalKey<CellState2>();
+final key7 = new GlobalKey<CellState2>();
+final key8 = new GlobalKey<CellState2>();
+final key9 = new GlobalKey<CellState2>();
 final key10 = new GlobalKey<CellState>();
 
 class Home extends StatefulWidget {
@@ -20,22 +21,29 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> {
   bool _measured = false;
   Size _screenSize;
-  List<Cell> cells = [
-    new Cell(key: key1, text: "c1"),
-    new Cell(key: key2, text: "c2"),
-    new Cell(key: key3, text: "c3"),
-    new Cell(key: key4, text: "c4"),
-    new Cell(key: key5, text: "c5"),
-    new Cell(key: key6, text: "c6"),
-    new Cell(key: key7, text: "c7"),
-    new Cell(key: key8, text: "c8"),
-    new Cell(key: key9, text: "c9"),
-  ];
-  Cell player = new Cell(key: key10, text: "c5");
+  List<Cell2> cells2;
+  Cell player;
 
   @override
   void initState() {
     super.initState();
+    cells2 = [
+      new Cell2(key: key1, text: "c1", callback: callback),
+      new Cell2(key: key2, text: "c2", callback: callback),
+      new Cell2(key: key3, text: "c3", callback: callback),
+      new Cell2(key: key4, text: "c4", callback: callback),
+      new Cell2(key: key5, text: "c5", callback: callback),
+      new Cell2(key: key6, text: "c6", callback: callback),
+      new Cell2(key: key7, text: "c7", callback: callback),
+      new Cell2(key: key8, text: "c8", callback: callback),
+      new Cell2(key: key9, text: "c9", callback: callback),
+    ];
+    player = new Cell(key: key10, text: "c5");
+  }
+
+  callback(Size s, Offset o) {
+    print("$s $o");
+    setState(() {});
   }
 
   @override
@@ -58,7 +66,7 @@ class HomeState extends State<Home> {
               children: <Widget>[
                 GridView.count(
                   crossAxisCount: 3,
-                  children: cells.map((cell) => cell).toList(),
+                  children: cells2.map((cell) => cell).toList(),
                 ),
                 Positioned(
                   child: player,
