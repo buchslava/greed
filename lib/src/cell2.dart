@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class Cell2 extends StatefulWidget {
   String text;
-  Function(Size, Offset) callback;
+  int order;
+  Function(int, Size, Offset, GlobalKey<CellState2>) callback;
 
-  Cell2({Key key, this.text, this.callback}) : super(key: key);
+  Cell2({Key key, this.text, this.callback, this.order}) : super(key: key);
 
   @override
   State<Cell2> createState() => CellState2();
@@ -22,7 +23,7 @@ class CellState2 extends State<Cell2> {
       onTap: () {
         final RenderBox box = context.findRenderObject();
         final position = box.localToGlobal(Offset.zero);
-        widget.callback(box.size, position);
+        widget.callback(widget.order, box.size, position, widget.key);
         // setState(() {});
       },
       child: Card(
