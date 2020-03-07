@@ -60,17 +60,25 @@ class HomeState extends State<Home> {
     }
   }
 
-  selections(int currentOrder, Size s, Offset o) {
+  selections(int newOrder, Size s, Offset o) {
     _size = s;
     _pos = o;
-    Offset pos = _getPos(currentOrder);
+    Offset pos = _getPos(newOrder);
     double xx = s.width * pos.dx;
     double yy = s.height * pos.dy;
 
-    var current = getCurrent(currentOrder);
+    var current = getCurrent(newOrder);
     current.position = Offset(xx, yy);
 
     selected = getSelected();
+
+    if (selected != null && selected.order == newOrder) {
+      setState(() {
+        selected.selected = false;
+      });
+      return;
+    }
+
     if (selected == null) {
       setState(() {
         for (int i = 0; i < model.length; i++) {
