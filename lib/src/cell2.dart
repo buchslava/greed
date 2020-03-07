@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:greed/src/home.dart';
 
 class Cell2 extends StatefulWidget {
-  String text;
-  int order;
-  Function(int, Size, Offset, GlobalKey<CellState2>) callback;
+  Item item;
+  Function(int current, Size, Offset) selections;
 
-  Cell2({Key key, this.text, this.callback, this.order}) : super(key: key);
+  Cell2({this.item, this.selections});
 
   @override
   State<Cell2> createState() => CellState2();
@@ -23,11 +23,15 @@ class CellState2 extends State<Cell2> {
       onTap: () {
         final RenderBox box = context.findRenderObject();
         final position = box.localToGlobal(Offset.zero);
-        widget.callback(widget.order, box.size, position, widget.key);
-        // setState(() {});
+        widget.selections(widget.item.order, box.size, position);
       },
       child: Card(
-        child: Text(widget.text),
+        child: Text(
+          widget.item.value.toString(),
+          style: TextStyle(
+              color:
+                  (widget.item.selected == true ? Colors.red : Colors.black)),
+        ),
       ),
     );
   }

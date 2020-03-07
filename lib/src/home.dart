@@ -17,27 +17,35 @@ class Home extends StatefulWidget {
   State<Home> createState() => HomeState();
 }
 
+class Item {
+  int value;
+  int order;
+  bool selected = false;
+  Offset position;
+  Item({this.value, this.order, this.selected}) {}
+}
+
 class HomeState extends State<Home> {
   bool _measured = false;
   Size _screenSize;
-  List<Cell2> cells2;
-  Cell player;
+  List<Item> model;
+  Item selected, playerModel, endpoint;
   Size _size;
   Offset _pos;
 
   @override
   void initState() {
     super.initState();
-    cells2 = [
-      new Cell2(key: key1, text: "c1", callback: callback, order: 0),
-      new Cell2(key: key2, text: "c2", callback: callback, order: 1),
-      new Cell2(key: key3, text: "c3", callback: callback, order: 2),
-      new Cell2(key: key4, text: "c4", callback: callback, order: 3),
-      new Cell2(key: key5, text: "c5", callback: callback, order: 4),
-      new Cell2(key: key6, text: "c6", callback: callback, order: 5),
-      new Cell2(key: key7, text: "c7", callback: callback, order: 6),
-      new Cell2(key: key8, text: "c8", callback: callback, order: 7),
-      new Cell2(key: key9, text: "c9", callback: callback, order: 8),
+    model = [
+      new Item(value: 10, order: 0),
+      new Item(value: 5, order: 1),
+      new Item(value: 15, order: 2),
+      new Item(value: 20, order: 3),
+      new Item(value: 40, order: 4),
+      new Item(value: 25, order: 5),
+      new Item(value: 5, order: 6),
+      new Item(value: 30, order: 7),
+      new Item(value: 45, order: 8),
     ];
   }
 
@@ -52,16 +60,59 @@ class HomeState extends State<Home> {
     }
   }
 
-  callback(int order, Size s, Offset o, GlobalKey<CellState2> key) {
+  selections(int currentOrder, Size s, Offset o) {
     _size = s;
     _pos = o;
-
-    Offset pos = _getPos(order);
+    Offset pos = _getPos(currentOrder);
     double xx = s.width * pos.dx;
     double yy = s.height * pos.dy;
-    print("$xx $yy");
-    _pos = Offset(xx, yy);
-    setState(() {});
+
+    var current = getCurrent(currentOrder);
+    current.position = Offset(xx, yy);
+
+    selected = getSelected();
+    if (selected == null) {
+      setState(() {
+        for (int i = 0; i < model.length; i++) {
+          model[i].selected = model[i] == current;
+        }
+      });
+    } else {
+      setState(() {
+        endpoint = current;
+        playerModel = selected;
+      });
+    }
+  }
+
+  move() {
+    setState(() {
+      for (int i = 0; i < model.length; i++) {
+        model[i].selected = false;
+      }
+      model[endpoint.order].value -= model[selected.order].value;
+      selected = null;
+      playerModel = null;
+      endpoint = null;
+    });
+  }
+
+  Item getCurrent(int order) {
+    for (int i = 0; i < model.length; i++) {
+      if (model[i].order == order) {
+        return model[i];
+      }
+    }
+    return null;
+  }
+
+  Item getSelected() {
+    for (int i = 0; i < model.length; i++) {
+      if (model[i].selected == true) {
+        return model[i];
+      }
+    }
+    return null;
   }
 
   @override
@@ -74,19 +125,26 @@ class HomeState extends State<Home> {
         ),
       );
     } else {
-      player = new Cell(text: "player");
-
       var ch = <Widget>[
         GridView.count(
           crossAxisCount: 3,
-          children: cells2.toList(),
+          children: model.map((Item item) {
+            return new Cell2(item: item, selections: selections);
+          }).toList(),
         ),
       ];
-      if (_pos != null && _size != null) {
+      if (playerModel != null) {
+        var selectedPos = _getPos(selected.order);
+        var endpointPos = _getPos(endpoint.order);
+        var endpointOffset = Offset(
+            endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
         ch.add(Positioned(
-          child: player,
-          top: _pos.dy,
-          left: _pos.dx,
+          child: new Cell(
+              text: "${playerModel.value}",
+              endpointOffset: endpointOffset,
+              move: move),
+          top: playerModel.position.dy,
+          left: playerModel.position.dx,
           width: _size.width,
           height: _size.height,
         ));
