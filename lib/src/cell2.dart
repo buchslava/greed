@@ -26,11 +26,15 @@ class CellState2 extends State<Cell2> {
         widget.selections(widget.item.order, box.size, position);
       },
       child: Card(
-        child: Text(
-          widget.item.value.toString(),
-          style: TextStyle(
-              color:
-                  (widget.item.selected == true ? Colors.red : Colors.black)),
+        child: Center(
+          child: Text(
+            widget.item.value.toString(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 45.0,
+                color:
+                    (widget.item.selected == true ? Colors.red : Colors.black)),
+          ),
         ),
       ),
     );

@@ -33,7 +33,16 @@ class CellState extends State<Cell> with TickerProviderStateMixin {
     });
     controller.forward();
 
-    return SlideTransition(position: offset, child: Text(widget.text));
+    return SlideTransition(
+        position: offset,
+        child: Card(
+            child: Center(
+                child: Text(widget.text,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 45.0,
+                      color: Colors.green,
+                    )))));
   }
 
   @override
