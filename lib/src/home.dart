@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:greed/src/cell.dart';
 import 'package:greed/src/cell2.dart';
@@ -11,6 +13,9 @@ final key6 = new GlobalKey<CellState2>();
 final key7 = new GlobalKey<CellState2>();
 final key8 = new GlobalKey<CellState2>();
 final key9 = new GlobalKey<CellState2>();
+
+final _random = new Random();
+int random(int min, int max) => min + _random.nextInt(max - min);
 
 class Home extends StatefulWidget {
   @override
@@ -32,21 +37,63 @@ class HomeState extends State<Home> {
   Item selected, playerModel, endpoint;
   Size _size;
   Offset _pos;
+  Timer gameTimer;
+  var valuesPool = [5, 10, 15, 20, 25, 30, 35, 40];
+  int score;
+
+  bool isOver() {
+    for (var i = 0; i < model.length; i++) {
+      if (model[i].value == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   @override
   void initState() {
     super.initState();
-    model = [
-      new Item(value: 10, order: 0),
-      new Item(value: 5, order: 1),
-      new Item(value: 15, order: 2),
-      new Item(value: 20, order: 3),
-      new Item(value: 40, order: 4),
-      new Item(value: 25, order: 5),
-      new Item(value: 5, order: 6),
-      new Item(value: 30, order: 7),
-      new Item(value: 45, order: 8),
-    ];
+    start();
+  }
+
+  start() {
+    score = 0;
+    model = [];
+    for (var i = 0; i < 9; i++) {
+      model.add(new Item(value: 0, order: i));
+    }
+    gameTimer = new Timer.periodic(new Duration(milliseconds: 1000), (timer) {
+      if (isOver()) {
+        setState(() {
+          gameTimer.cancel();
+          gameTimer = null;
+        });
+        return;
+      }
+      List<int> freeSlots = [];
+      for (var i = 0; i < model.length; i++) {
+        if (model[i].value == 0) {
+          freeSlots.add(i);
+        }
+      }
+      int pos = freeSlots.length == 1 ? 0 : random(0, freeSlots.length - 1);
+      int r = random(0, valuesPool.length - 1);
+
+      setState(() {
+        model[freeSlots[pos]].value = valuesPool[r];
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    gameTimer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
   }
 
   Offset _getPos(int order) {
@@ -61,6 +108,9 @@ class HomeState extends State<Home> {
   }
 
   selections(int newOrder, Size s, Offset o) {
+    if (isOver()) {
+      return;
+    }
     _size = s;
     _pos = o;
     Offset pos = _getPos(newOrder);
@@ -72,7 +122,8 @@ class HomeState extends State<Home> {
 
     selected = getSelected();
 
-    if (selected != null && selected.order == newOrder) {
+    if (selected != null &&
+        (selected.order == newOrder || current.value < selected.value)) {
       setState(() {
         selected.selected = false;
       });
@@ -94,11 +145,16 @@ class HomeState extends State<Home> {
   }
 
   move() {
+    if (isOver()) {
+      return;
+    }
     setState(() {
       for (int i = 0; i < model.length; i++) {
         model[i].selected = false;
       }
       model[endpoint.order].value -= model[selected.order].value;
+      score += model[selected.order].value;
+      model[selected.order].value = 0;
       selected = null;
       playerModel = null;
       endpoint = null;
@@ -157,13 +213,44 @@ class HomeState extends State<Home> {
           height: _size.height,
         ));
       }
-      return new Expanded(
-        flex: 1,
-        child: new Container(
-            width: _screenSize.width,
-            height: _screenSize.height,
-            color: Colors.white,
-            child: Stack(children: ch)),
+      /*
+      new Expanded(
+            flex: 1,
+            child: new Container(
+                width: _screenSize.width,
+                height: _screenSize.height,
+                color: Colors.white,
+                child: Stack(children: ch)),
+          )
+      */
+      var sb = RaisedButton(
+        child: Text("NEW GAME"),
+        onPressed: start,
+        color: Colors.green,
+        textColor: Colors.yellow,
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        splashColor: Colors.grey,
+      );
+      var sc = Text("$score", style: TextStyle(fontSize: 30));
+
+      return Column(
+        children: [
+          Container(
+            margin: EdgeInsets.all(30.0),
+            padding: EdgeInsets.all(10.0),
+            alignment: Alignment.topCenter,
+            decoration: BoxDecoration(
+              color: Colors.green,
+              border: Border.all(),
+            ),
+            child: gameTimer == null ? sb : sc,
+          ),
+          new Container(
+              width: _screenSize.width,
+              height: _screenSize.height - 300,
+              color: Colors.white,
+              child: Stack(children: ch))
+        ],
       );
     }
   }

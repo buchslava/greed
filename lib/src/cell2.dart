@@ -28,7 +28,7 @@ class CellState2 extends State<Cell2> {
       child: Card(
         child: Center(
           child: Text(
-            widget.item.value.toString(),
+            widget.item.value == 0 ? '' : widget.item.value.toString(),
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontSize: 45.0,

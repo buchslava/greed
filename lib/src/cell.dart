@@ -47,7 +47,7 @@ class CellState extends State<Cell> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    super.dispose();
     controller.dispose();
+    super.dispose();
   }
 }
