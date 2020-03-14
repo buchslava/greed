@@ -145,8 +145,16 @@ class HomeState extends State<Home> {
       setState(() {
         endpoint = current;
         playerModel = selected;
-        model[selected.order].saveState(); 
+        model[selected.order].saveState();
         model[selected.order].value = 0;
+        var selectedPos = _getPos(selected.order);
+        var endpointPos = _getPos(endpoint.order);
+        var endpointOffset = Offset(
+            endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
+        player = new Cell(
+            text: "${playerModel.prevValue}",
+            endpointOffset: endpointOffset,
+            move: move);
       });
     }
   }
@@ -206,16 +214,6 @@ class HomeState extends State<Home> {
         ),
       ];
       if (playerModel != null) {
-        var selectedPos = _getPos(selected.order);
-        var endpointPos = _getPos(endpoint.order);
-        var endpointOffset = Offset(
-            endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
-        if (player == null) {
-          player = new Cell(
-              text: "${playerModel.prevValue}",
-              endpointOffset: endpointOffset,
-              move: move);
-        }
         ch.add(Positioned(
           child: player,
           top: playerModel.position.dy,
