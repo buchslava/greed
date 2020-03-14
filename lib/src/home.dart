@@ -23,11 +23,15 @@ class Home extends StatefulWidget {
 }
 
 class Item {
-  int value;
+  int value, prevValue;
   int order;
   bool selected = false;
   Offset position;
   Item({this.value, this.order, this.selected}) {}
+
+  saveState() {
+    prevValue = value;
+  }
 }
 
 class HomeState extends State<Home> {
@@ -35,6 +39,7 @@ class HomeState extends State<Home> {
   Size _screenSize;
   List<Item> model;
   Item selected, playerModel, endpoint;
+  Cell player;
   Size _size;
   Offset _pos;
   Timer gameTimer;
@@ -62,7 +67,7 @@ class HomeState extends State<Home> {
     for (var i = 0; i < 9; i++) {
       model.add(new Item(value: 0, order: i));
     }
-    gameTimer = new Timer.periodic(new Duration(milliseconds: 1000), (timer) {
+    gameTimer = new Timer.periodic(new Duration(milliseconds: 3000), (timer) {
       if (isOver()) {
         setState(() {
           gameTimer.cancel();
@@ -140,6 +145,8 @@ class HomeState extends State<Home> {
       setState(() {
         endpoint = current;
         playerModel = selected;
+        model[selected.order].saveState(); 
+        model[selected.order].value = 0;
       });
     }
   }
@@ -152,11 +159,12 @@ class HomeState extends State<Home> {
       for (int i = 0; i < model.length; i++) {
         model[i].selected = false;
       }
-      model[endpoint.order].value -= model[selected.order].value;
+      model[endpoint.order].value -= selected.prevValue;
       score += model[selected.order].value;
       model[selected.order].value = 0;
       selected = null;
       playerModel = null;
+      player = null;
       endpoint = null;
     });
   }
@@ -202,11 +210,14 @@ class HomeState extends State<Home> {
         var endpointPos = _getPos(endpoint.order);
         var endpointOffset = Offset(
             endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
-        ch.add(Positioned(
-          child: new Cell(
-              text: "${playerModel.value}",
+        if (player == null) {
+          player = new Cell(
+              text: "${playerModel.prevValue}",
               endpointOffset: endpointOffset,
-              move: move),
+              move: move);
+        }
+        ch.add(Positioned(
+          child: player,
           top: playerModel.position.dy,
           left: playerModel.position.dx,
           width: _size.width,
