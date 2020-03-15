@@ -3,16 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:greed/src/cell.dart';
 import 'package:greed/src/cell2.dart';
-
-final key1 = new GlobalKey<CellState2>();
-final key2 = new GlobalKey<CellState2>();
-final key3 = new GlobalKey<CellState2>();
-final key4 = new GlobalKey<CellState2>();
-final key5 = new GlobalKey<CellState2>();
-final key6 = new GlobalKey<CellState2>();
-final key7 = new GlobalKey<CellState2>();
-final key8 = new GlobalKey<CellState2>();
-final key9 = new GlobalKey<CellState2>();
+import 'package:greed/src/item.dart';
 
 final _random = new Random();
 int random(int min, int max) => min + _random.nextInt(max - min);
@@ -22,29 +13,18 @@ class Home extends StatefulWidget {
   State<Home> createState() => HomeState();
 }
 
-class Item {
-  int value, prevValue;
-  int order;
-  bool selected = false;
-  Offset position;
-  Item({this.value, this.order, this.selected}) {}
-
-  saveState() {
-    prevValue = value;
-  }
-}
-
 class HomeState extends State<Home> {
   bool _measured = false;
   Size _screenSize;
   List<Item> model;
-  Item selected, playerModel, endpoint;
-  Cell player;
+  Item selected;
+  List<Cell> players = [];
   Size _size;
   Offset _pos;
   Timer gameTimer;
   var valuesPool = [5, 10, 15, 20, 25, 30, 35, 40];
   int score;
+  int globalId = 1;
 
   bool isOver() {
     for (var i = 0; i < model.length; i++) {
@@ -67,7 +47,7 @@ class HomeState extends State<Home> {
     for (var i = 0; i < 9; i++) {
       model.add(new Item(value: 0, order: i));
     }
-    gameTimer = new Timer.periodic(new Duration(milliseconds: 3000), (timer) {
+    gameTimer = new Timer.periodic(new Duration(milliseconds: 2000), (timer) {
       if (isOver()) {
         setState(() {
           gameTimer.cancel();
@@ -143,23 +123,24 @@ class HomeState extends State<Home> {
       });
     } else {
       setState(() {
-        endpoint = current;
-        playerModel = selected;
-        model[selected.order].saveState();
-        model[selected.order].value = 0;
+        Item endpoint = current;
+        selected.saveState();
+        selected.value = 0;
         var selectedPos = _getPos(selected.order);
         var endpointPos = _getPos(endpoint.order);
         var endpointOffset = Offset(
             endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
-        player = new Cell(
-            text: "${playerModel.prevValue}",
+        players.add(new Cell(
+            id: globalId++,
+            model: selected,
+            target: endpoint,
             endpointOffset: endpointOffset,
-            move: move);
+            move: move));
       });
     }
   }
 
-  move() {
+  move(int id) {
     if (isOver()) {
       return;
     }
@@ -167,13 +148,14 @@ class HomeState extends State<Home> {
       for (int i = 0; i < model.length; i++) {
         model[i].selected = false;
       }
-      model[endpoint.order].value -= selected.prevValue;
-      score += model[selected.order].value;
-      model[selected.order].value = 0;
-      selected = null;
-      playerModel = null;
-      player = null;
-      endpoint = null;
+      var relatedPlayer =
+          players.singleWhere((p) => p.id == id, orElse: () => null);
+      if (relatedPlayer != null) {
+        model[relatedPlayer.target.order].value -= relatedPlayer.model.prevValue;
+        score += relatedPlayer.model.prevValue;
+        selected = null;
+        players.removeWhere((p) => p.id == id);
+      }
     });
   }
 
@@ -213,14 +195,16 @@ class HomeState extends State<Home> {
           }).toList(),
         ),
       ];
-      if (playerModel != null) {
-        ch.add(Positioned(
-          child: player,
-          top: playerModel.position.dy,
-          left: playerModel.position.dx,
-          width: _size.width,
-          height: _size.height,
-        ));
+      if (players.length > 0) {
+        for (var i = 0; i < players.length; i++) {
+          ch.add(Positioned(
+            child: players[i],
+            top: players[i].model.position.dy,
+            left: players[i].model.position.dx,
+            width: _size.width,
+            height: _size.height,
+          ));
+        }
       }
       /*
       new Expanded(

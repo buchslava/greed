@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:greed/src/home.dart';
+import 'package:greed/src/item.dart';
 
 class Cell2 extends StatefulWidget {
   Item item;

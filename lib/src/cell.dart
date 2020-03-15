@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:greed/src/item.dart';
 
 class Cell extends StatefulWidget {
-  String text;
+  int id;
+  Item model, target;
   Offset endpointOffset;
-  Function() move;
+  Function(int id) move;
 
-  Cell({this.text, this.endpointOffset, this.move});
+  Cell({this.id, this.model, this.target, this.endpointOffset, this.move});
 
   @override
   State<Cell> createState() => CellState();
@@ -28,7 +30,7 @@ class CellState extends State<Cell> with TickerProviderStateMixin {
             .animate(controller);
     controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        widget.move();
+        widget.move(widget.id);
       }
     });
     controller.forward();
@@ -37,7 +39,7 @@ class CellState extends State<Cell> with TickerProviderStateMixin {
         position: offset,
         child: Card(
             child: Center(
-                child: Text(widget.text,
+                child: Text("${widget.model.prevValue}",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 45.0,
