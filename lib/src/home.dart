@@ -25,48 +25,10 @@ class HomeState extends State<Home> {
   int globalId = 1;
   var valuesPool = [5, 10, 15, 20, 25, 30, 35, 40];
 
-  bool isOver() {
-    for (var i = 0; i < model.length; i++) {
-      if (model[i].value == 0) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   @override
   void initState() {
     super.initState();
-    start();
-  }
-
-  start() {
-    score = 0;
-    model = [];
-    for (var i = 0; i < 9; i++) {
-      model.add(new CellItem(value: 0, order: i));
-    }
-    gameTimer = new Timer.periodic(new Duration(milliseconds: 1000), (timer) {
-      if (isOver()) {
-        setState(() {
-          gameTimer.cancel();
-          gameTimer = null;
-        });
-        return;
-      }
-      List<int> freeSlots = [];
-      for (var i = 0; i < model.length; i++) {
-        if (model[i].value == 0) {
-          freeSlots.add(i);
-        }
-      }
-      int pos = freeSlots.length == 1 ? 0 : random(0, freeSlots.length - 1);
-      int r = random(0, valuesPool.length - 1);
-
-      setState(() {
-        model[freeSlots[pos]].value = valuesPool[r];
-      });
-    });
+    _start();
   }
 
   @override
@@ -78,102 +40,6 @@ class HomeState extends State<Home> {
   @override
   void deactivate() {
     super.deactivate();
-  }
-
-  Offset _getPos(int order) {
-    int p = 0;
-    for (int y = 0;; y++) {
-      for (int x = 0; x < 3; x++) {
-        if (p++ == order) {
-          return Offset(x.toDouble(), y.toDouble());
-        }
-      }
-    }
-  }
-
-  selections(int newOrder, Size s) {
-    if (isOver()) {
-      return;
-    }
-    _size = s;
-    Offset pos = _getPos(newOrder);
-    double xx = s.width * pos.dx;
-    double yy = s.height * pos.dy;
-
-    var current = getCurrent(newOrder);
-    current.position = Offset(xx, yy);
-
-    selected = getSelected();
-
-    if (selected != null &&
-        (selected.order == newOrder || current.value < selected.value)) {
-      setState(() {
-        selected.selected = false;
-      });
-      return;
-    }
-
-    if (selected == null) {
-      setState(() {
-        for (int i = 0; i < model.length; i++) {
-          model[i].selected = model[i] == current && model[i].value > 0;
-        }
-      });
-    } else {
-      setState(() {
-        CellItem endpoint = current;
-        selected.saveState();
-        selected.value = 0;
-        var selectedPos = _getPos(selected.order);
-        var endpointPos = _getPos(endpoint.order);
-        var endpointOffset = Offset(
-            endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
-        players.add(new PlayerCell(
-            id: globalId++,
-            model: selected.clone(),
-            target: endpoint.clone(),
-            endpointOffset: endpointOffset,
-            move: move));
-      });
-    }
-  }
-
-  move(int id) {
-    if (isOver()) {
-      return;
-    }
-    setState(() {
-      for (int i = 0; i < model.length; i++) {
-        model[i].selected = false;
-      }
-      var relatedPlayer =
-          players.singleWhere((p) => p.id == id, orElse: () => null);
-      if (relatedPlayer != null) {
-        model[relatedPlayer.target.order].value -=
-            relatedPlayer.model.prevValue;
-        score += relatedPlayer.model.prevValue;
-        selected = null;
-        players.removeWhere((p) => p.id == id);
-      }
-    });
-  }
-
-  CellItem getCurrent(int order) {
-    for (int i = 0; i < model.length; i++) {
-      if (model[i].order == order) {
-        return model[i];
-      }
-    }
-    return null;
-  }
-
-  CellItem getSelected() {
-    for (int i = 0; i < model.length; i++) {
-      if (model[i].selected == true) {
-        return model[i];
-      }
-    }
-    return null;
   }
 
   @override
@@ -217,7 +83,7 @@ class HomeState extends State<Home> {
       */
       var sb = RaisedButton(
         child: Text("NEW GAME"),
-        onPressed: start,
+        onPressed: _start,
         color: Colors.green,
         textColor: Colors.yellow,
         padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -247,6 +113,132 @@ class HomeState extends State<Home> {
     }
   }
 
+  selections(int newOrder, Size s) {
+    if (_isOver()) {
+      return;
+    }
+    _size = s;
+    Offset pos = _getPos(newOrder);
+    double xx = s.width * pos.dx;
+    double yy = s.height * pos.dy;
+
+    var current = _getCurrent(newOrder);
+    current.position = Offset(xx, yy);
+
+    selected = _getSelected();
+
+    if (selected != null &&
+        (selected.order == newOrder || current.value < selected.value)) {
+      setState(() {
+        selected.selected = false;
+      });
+      return;
+    }
+
+    if (selected == null) {
+      setState(() {
+        for (int i = 0; i < model.length; i++) {
+          model[i].selected = model[i] == current && model[i].value > 0;
+        }
+      });
+    } else {
+      setState(() {
+        CellItem endpoint = current;
+        selected.saveState();
+        selected.value = 0;
+        var selectedPos = _getPos(selected.order);
+        var endpointPos = _getPos(endpoint.order);
+        var endpointOffset = Offset(
+            endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
+        players.add(new PlayerCell(
+            id: globalId++,
+            model: selected.clone(),
+            target: endpoint.clone(),
+            endpointOffset: endpointOffset,
+            move: _move));
+      });
+    }
+  }
+
+  _move(int id) {
+    if (_isOver()) {
+      return;
+    }
+    setState(() {
+      for (int i = 0; i < model.length; i++) {
+        model[i].selected = false;
+      }
+      var relatedPlayer =
+          players.singleWhere((p) => p.id == id, orElse: () => null);
+      if (relatedPlayer != null) {
+        model[relatedPlayer.target.order].value -=
+            relatedPlayer.model.prevValue;
+        score += relatedPlayer.model.prevValue;
+        selected = null;
+        players.removeWhere((p) => p.id == id);
+      }
+    });
+  }
+
+  CellItem _getCurrent(int order) {
+    for (int i = 0; i < model.length; i++) {
+      if (model[i].order == order) {
+        return model[i];
+      }
+    }
+    return null;
+  }
+
+  CellItem _getSelected() {
+    for (int i = 0; i < model.length; i++) {
+      if (model[i].selected == true) {
+        return model[i];
+      }
+    }
+    return null;
+  }
+
+  Offset _getPos(int order) {
+    int p = 0;
+    for (int y = 0;; y++) {
+      for (int x = 0; x < 3; x++) {
+        if (p++ == order) {
+          return Offset(x.toDouble(), y.toDouble());
+        }
+      }
+    }
+  }
+
+  _start() {
+    score = 0;
+    model = [];
+    for (var i = 0; i < 9; i++) {
+      model.add(new CellItem(value: 0, order: i));
+    }
+    gameTimer = new Timer.periodic(new Duration(milliseconds: 1000), (timer) {
+      if (_isOver()) {
+        if (gameTimer != null && gameTimer.isActive) {
+          gameTimer.cancel();
+          gameTimer = null;
+        }
+        setState(() {});
+        return;
+      }
+      List<int> freeSlots = [];
+      for (var i = 0; i < model.length; i++) {
+        if (model[i].value == 0) {
+          freeSlots.add(i);
+        }
+      }
+      int pos = freeSlots.length == 1 ? 0 : random(0, freeSlots.length - 1);
+      int r = random(0, valuesPool.length - 1);
+
+      setState(() {
+        model[freeSlots[pos]].value = valuesPool[r];
+      });
+    });
+  }
+
   _measure() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _screenSize = MediaQuery.of(context).size;
@@ -254,5 +246,14 @@ class HomeState extends State<Home> {
         _measured = true;
       });
     });
+  }
+
+  bool _isOver() {
+    for (var i = 0; i < model.length; i++) {
+      if (model[i].value == 0) {
+        return false;
+      }
+    }
+    return true;
   }
 }
