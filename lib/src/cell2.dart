@@ -26,6 +26,7 @@ class CellState2 extends State<Cell2> {
         widget.selections(widget.item.order, box.size, position);
       },
       child: Card(
+        color: (widget.item.selected == true ? Colors.yellow : Colors.white),
         child: Center(
           child: Text(
             widget.item.value == 0 ? '' : widget.item.value.toString(),

@@ -10,4 +10,11 @@ class Item {
   saveState() {
     prevValue = value;
   }
+
+  Item clone() {
+    var res = Item(value: this.value, order: this.order, selected: false);
+    res.position = Offset(this.position.dx, this.position.dy);
+    res.prevValue = this.prevValue;
+    return res;
+  }
 }

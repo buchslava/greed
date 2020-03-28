@@ -47,7 +47,7 @@ class HomeState extends State<Home> {
     for (var i = 0; i < 9; i++) {
       model.add(new Item(value: 0, order: i));
     }
-    gameTimer = new Timer.periodic(new Duration(milliseconds: 2000), (timer) {
+    gameTimer = new Timer.periodic(new Duration(milliseconds: 1000), (timer) {
       if (isOver()) {
         setState(() {
           gameTimer.cancel();
@@ -118,7 +118,7 @@ class HomeState extends State<Home> {
     if (selected == null) {
       setState(() {
         for (int i = 0; i < model.length; i++) {
-          model[i].selected = model[i] == current;
+          model[i].selected = model[i] == current && model[i].value > 0;
         }
       });
     } else {
@@ -132,8 +132,8 @@ class HomeState extends State<Home> {
             endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
         players.add(new Cell(
             id: globalId++,
-            model: selected,
-            target: endpoint,
+            model: selected.clone(),
+            target: endpoint.clone(),
             endpointOffset: endpointOffset,
             move: move));
       });
@@ -151,7 +151,8 @@ class HomeState extends State<Home> {
       var relatedPlayer =
           players.singleWhere((p) => p.id == id, orElse: () => null);
       if (relatedPlayer != null) {
-        model[relatedPlayer.target.order].value -= relatedPlayer.model.prevValue;
+        model[relatedPlayer.target.order].value -=
+            relatedPlayer.model.prevValue;
         score += relatedPlayer.model.prevValue;
         selected = null;
         players.removeWhere((p) => p.id == id);
