@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:greed/src/item.dart';
+import 'package:greed/src/cell-item.dart';
 
-class Cell2 extends StatefulWidget {
-  Item item;
-  Function(int current, Size, Offset) selections;
+class BoardCell extends StatefulWidget {
+  CellItem item;
+  Function(int current, Size) selections;
 
-  Cell2({this.item, this.selections});
+  BoardCell({this.item, this.selections});
 
   @override
-  State<Cell2> createState() => CellState2();
+  State<BoardCell> createState() => CellState2();
 }
 
-class CellState2 extends State<Cell2> {
+class CellState2 extends State<BoardCell> {
   @override
   void initState() {
     super.initState();
@@ -22,8 +22,7 @@ class CellState2 extends State<Cell2> {
     return new GestureDetector(
       onTap: () {
         final RenderBox box = context.findRenderObject();
-        final position = box.localToGlobal(Offset.zero);
-        widget.selections(widget.item.order, box.size, position);
+        widget.selections(widget.item.order, box.size);
       },
       child: Card(
         color: (widget.item.selected == true ? Colors.yellow : Colors.white),

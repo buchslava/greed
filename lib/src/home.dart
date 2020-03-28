@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:greed/src/cell.dart';
-import 'package:greed/src/cell2.dart';
-import 'package:greed/src/item.dart';
+import 'package:greed/src/player-cell.dart';
+import 'package:greed/src/board-cell.dart';
+import 'package:greed/src/cell-item.dart';
 
 final _random = new Random();
 int random(int min, int max) => min + _random.nextInt(max - min);
@@ -16,15 +16,14 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> {
   bool _measured = false;
   Size _screenSize;
-  List<Item> model;
-  Item selected;
-  List<Cell> players = [];
+  List<CellItem> model;
+  CellItem selected;
+  List<PlayerCell> players = [];
   Size _size;
-  Offset _pos;
   Timer gameTimer;
-  var valuesPool = [5, 10, 15, 20, 25, 30, 35, 40];
   int score;
   int globalId = 1;
+  var valuesPool = [5, 10, 15, 20, 25, 30, 35, 40];
 
   bool isOver() {
     for (var i = 0; i < model.length; i++) {
@@ -45,7 +44,7 @@ class HomeState extends State<Home> {
     score = 0;
     model = [];
     for (var i = 0; i < 9; i++) {
-      model.add(new Item(value: 0, order: i));
+      model.add(new CellItem(value: 0, order: i));
     }
     gameTimer = new Timer.periodic(new Duration(milliseconds: 1000), (timer) {
       if (isOver()) {
@@ -92,12 +91,11 @@ class HomeState extends State<Home> {
     }
   }
 
-  selections(int newOrder, Size s, Offset o) {
+  selections(int newOrder, Size s) {
     if (isOver()) {
       return;
     }
     _size = s;
-    _pos = o;
     Offset pos = _getPos(newOrder);
     double xx = s.width * pos.dx;
     double yy = s.height * pos.dy;
@@ -123,14 +121,14 @@ class HomeState extends State<Home> {
       });
     } else {
       setState(() {
-        Item endpoint = current;
+        CellItem endpoint = current;
         selected.saveState();
         selected.value = 0;
         var selectedPos = _getPos(selected.order);
         var endpointPos = _getPos(endpoint.order);
         var endpointOffset = Offset(
             endpointPos.dx - selectedPos.dx, endpointPos.dy - selectedPos.dy);
-        players.add(new Cell(
+        players.add(new PlayerCell(
             id: globalId++,
             model: selected.clone(),
             target: endpoint.clone(),
@@ -160,7 +158,7 @@ class HomeState extends State<Home> {
     });
   }
 
-  Item getCurrent(int order) {
+  CellItem getCurrent(int order) {
     for (int i = 0; i < model.length; i++) {
       if (model[i].order == order) {
         return model[i];
@@ -169,7 +167,7 @@ class HomeState extends State<Home> {
     return null;
   }
 
-  Item getSelected() {
+  CellItem getSelected() {
     for (int i = 0; i < model.length; i++) {
       if (model[i].selected == true) {
         return model[i];
@@ -191,8 +189,8 @@ class HomeState extends State<Home> {
       var ch = <Widget>[
         GridView.count(
           crossAxisCount: 3,
-          children: model.map((Item item) {
-            return new Cell2(item: item, selections: selections);
+          children: model.map((CellItem item) {
+            return new BoardCell(item: item, selections: selections);
           }).toList(),
         ),
       ];

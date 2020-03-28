@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:greed/src/item.dart';
+import 'package:greed/src/cell-item.dart';
 
-class Cell extends StatefulWidget {
+class PlayerCell extends StatefulWidget {
   int id;
-  Item model, target;
+  CellItem model, target;
   Offset endpointOffset;
   Function(int id) move;
 
-  Cell({this.id, this.model, this.target, this.endpointOffset, this.move});
+  PlayerCell(
+      {this.id, this.model, this.target, this.endpointOffset, this.move});
 
   @override
-  State<Cell> createState() => CellState();
+  State<PlayerCell> createState() => PlayerCellState();
 }
 
-class CellState extends State<Cell> with TickerProviderStateMixin {
+class PlayerCellState extends State<PlayerCell> with TickerProviderStateMixin {
   AnimationController controller;
 
   @override
