@@ -15,7 +15,7 @@ class App extends StatelessWidget {
             title: Text("Greed"),
             centerTitle: true,
           ),
-          body: SafeArea(child: new Column(children: [Home()])),
+          body: Home(),
         ));
   }
 }

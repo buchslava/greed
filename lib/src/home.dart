@@ -71,43 +71,35 @@ class HomeState extends State<Home> {
           ));
         }
       }
-      /*
-      new Expanded(
-            flex: 1,
-            child: new Container(
-                width: _screenSize.width,
-                height: _screenSize.height,
-                color: Colors.white,
-                child: Stack(children: ch)),
-          )
-      */
       var sb = RaisedButton(
         child: Text("NEW GAME"),
         onPressed: _start,
-        color: Colors.green,
-        textColor: Colors.yellow,
-        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        color: Colors.blueAccent,
+        textColor: Colors.white,
+        padding: EdgeInsets.fromLTRB(50, 20, 50, 20),
         splashColor: Colors.grey,
       );
-      var sc = Text("$score", style: TextStyle(fontSize: 30));
+      var sc = Text("$score", style: TextStyle(fontSize: 70));
 
       return Column(
         children: [
-          Container(
-            margin: EdgeInsets.all(30.0),
-            padding: EdgeInsets.all(10.0),
-            alignment: Alignment.topCenter,
-            decoration: BoxDecoration(
-              color: Colors.green,
-              border: Border.all(),
-            ),
-            child: gameTimer == null ? sb : sc,
+          Expanded(
+              flex: 4,
+              // child: gameTimer == null ? sb : sc,
+              child: Column(
+                children: [sb, sc],
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+              )),
+          Expanded(
+            flex: 6,
+            child: new Container(
+                width: _screenSize.width,
+                height: _screenSize.height - 300,
+                color: Colors.white,
+                child: Stack(children: ch)),
           ),
-          new Container(
-              width: _screenSize.width,
-              height: _screenSize.height - 300,
-              color: Colors.white,
-              child: Stack(children: ch))
         ],
       );
     }
